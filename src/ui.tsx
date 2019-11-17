@@ -28,6 +28,7 @@ function App() {
   const [query, setQuery] = useState(' ');
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState([]);
+  const [css, setCSS] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -38,12 +39,21 @@ function App() {
 
       version = packageJson.tags.latest;
 
-      const response = await fetch(
-        `https://data.jsdelivr.com/v1/package/npm/boxicons@${version}`
-      );
-      const files = await response.json();
+      const data = await Promise.all([
+        fetch(
+          `https://cdn.jsdelivr.net/npm/boxicons@${version}/css/boxicons.min.css`
+        ),
+        fetch(`https://data.jsdelivr.com/v1/package/npm/boxicons@${version}`),
+      ]);
 
-      const icons = files.files.filter(dir => dir.name === 'svg')[0].files;
+      const [cssResponse, metaResponse] = data;
+
+      const texts = await Promise.all([
+        cssResponse.text(),
+        metaResponse.json(),
+      ]);
+
+      const icons = texts[1].files.filter(dir => dir.name === 'svg')[0].files;
       const solid = icons
         .filter(dir => dir.name === 'solid')[0]
         .files.map(icon => ({
@@ -74,6 +84,7 @@ function App() {
       setMeta(json);
       setLoading(false);
       setQuery('');
+      setCSS(texts[0]);
     })();
   }, []);
 
@@ -97,6 +108,24 @@ function App() {
         </div>
       ) : (
         <React.Fragment>
+          <style>{css}</style>
+          <style>
+            {`
+              @font-face
+              {
+                  font-family: 'boxicons';
+                  font-weight: normal;
+                  font-style: normal;
+              
+                  src: url('https://cdn.jsdelivr.net/npm/boxicons@${version}/fonts/boxicons.eot');
+                  src: url('https://cdn.jsdelivr.net/npm/boxicons@${version}/fonts/boxicons.eot') format('embedded-opentype'),
+                  url('https://cdn.jsdelivr.net/npm/boxicons@${version}/fonts/boxicons.woff2') format('woff2'),
+                  url('https://cdn.jsdelivr.net/npm/boxicons@${version}/fonts/boxicons.woff') format('woff'),
+                  url('https://cdn.jsdelivr.net/npm/boxicons@${version}/fonts/boxicons.ttf') format('truetype'),
+                  url('https://cdn.jsdelivr.net/npm/boxicons@${version}/fonts/boxicons.svg?#boxicons') format('svg');
+              }
+              `}
+          </style>
           <Global
             styles={{ body: { margin: 0, fontFamily: 'Inter, sans-serif' } }}
           />

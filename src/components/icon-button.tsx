@@ -22,6 +22,7 @@ async function sendIcon(name, url) {
 function IconButton({ icon, style, version }: IconButtonProps) {
   const { name, type, prefix } = icon;
   const url = `https://cdn.jsdelivr.net/npm/boxicons@${version}/svg/${type}/${name}`;
+  const cls = name.replace('.svg', '');
 
   return (
     <button
@@ -34,7 +35,9 @@ function IconButton({ icon, style, version }: IconButtonProps) {
         background: 'transparent',
         border: 0,
         borderRadius: theme.radii[1],
+        animation: 'fadeIn 200ms ease-in-out',
         appearance: 'none',
+        fontSize: '24px',
         outline: 0,
         '&:hover': {
           background: 'rgba(0, 0, 0, 0.06)',
@@ -45,7 +48,7 @@ function IconButton({ icon, style, version }: IconButtonProps) {
         ...style,
       }}
     >
-      <img src={url} width={24} height={24} />
+      <i className={`bx ${cls}`}></i>
     </button>
   );
 }
